@@ -1,0 +1,113 @@
+#:import hex kivy.utils.get_color_from_hex
+#:import  MarkupLabel kivy.core.text.markup.MarkupLabel
+<CalcGridLayout>: 
+    name: "SurfOnVpn" 
+    minimum_width:  400
+    minimum_height: 400
+    id: mainWindow
+    rows: 5
+    font_size: 15
+    canvas.before:
+        Rectangle:
+            source: 'bg4.jpg'
+            pos: self.pos
+            size: self.size
+    GridLayout:
+    	rows: 4
+
+    	FloatLayout:
+            id: container1
+
+            Spinner:
+                id: settings_btn
+                pos: mainWindow.size[0] - self.width , mainWindow.size[1] - 1.2 * self.height
+                values: ["Settings", "About Us", "Contribute", "Help", "Report Issue"]         
+                text: "Settings"
+                font_size: 18
+                text_size: 0.8 * self.width, 0.4 * self.height
+                # background_color:  hex('#631d1d')
+                background_color:  hex('#666699')                                     
+                height: mainWindow.height * 0.18
+                width: mainWindow.width * 0.200
+                size_hint: 0.24, 0.31
+                # on_press: mainWindow.toggle(connect_button.text)                 
+                font_name: 'DejaVuSans'    
+                on_text: root.settings(settings_btn.text)            
+
+                Image:                
+                    source: 'settings.gif'      
+                    height: settings_btn.height * 0.6
+                    width: settings_btn.width * 0.6
+                    pos: settings_btn.x + self.width * 0.9, settings_btn.y + self.height * 0.3
+                    anim_delay: 1.5
+
+    		Label:
+    		    id: banner
+                markup: True  
+    			text: "Go anomalous with [b][i]SurfOnVpn[/i][/b]"                
+    			font_size: 26
+    			color: hex('#66ffb3')
+                bcolor: 1, 1, 1, 1
+                #  pos: settings_btn.x - settings_btn.width - self.texture_size[0] , settings_btn.y - self.texture_size[1]    
+                pos: 0, mainWindow.height - self.font_size  * 7
+                text_size: 220, None            
+	            # canvas.before:
+                #    Color:
+                #        rgba: self.bcolor
+                #    Rectangle:
+                #        pos: 2.7 * self.x, 1.17 * self.y
+                #        size: self.texture_size[0] * 1.2, self.texture_size[1] * 2
+
+        BoxLayout:
+            orientation: 'vertical'
+            FloatLayout
+                Label:                
+                    id: status
+                    markup: True
+                    text: "[font=RobotoMono-Regular][b][i]Disconnected[/i][/b][/font]"
+                    color: hex('#000000')
+                    font_size: 28
+                    x: 0.9 * banner.x
+                    y: banner.y - self.height
+                Image:
+                    id: connecting_gif
+                    source: 'connecting.gif'
+                    anim_delay: 0.05
+                    size: 0,0 
+                    height: 0
+                    width: 0
+                    pos: status.pos  
+                    disabled: True    
+                    opacity: 0
+                Spinner:
+                    id: spinner_id
+                    background_color:  hex('#009999')
+                    text: "Select Server"
+                    font_size: 18
+                    values: ["Europe", "Europe2", "US", "Canada", "DE"]            
+                    # on_text: root.spinner_clicked(spinner_id.text)
+                    #pos: self.parent.x, self.parent.y                                 
+                    x: status.x + self.width * 1.8
+                    y: status.y - self.height * 1.5 
+                    size_hint: None, None
+                    height: mainWindow.height * 0.111  
+                    width: mainWindow.width * 0.211
+                    bar_color: hex('#009999')                        
+        FloatLayout:
+            Button:
+                id: connect_button
+                text: "Connect"
+                font_size: 18
+                background_color: 0, 1, 0, 1
+                size_hint: None, None
+                height: mainWindow.height * 0.111  
+                width: mainWindow.width * 0.211   
+                pos:  spinner_id.x , spinner_id.y - self.height * 1.5             
+                on_press: mainWindow.toggle(self.text)
+
+
+<InitialWindow>:
+    Label:
+        text: "We need root access to connect please provide root password."
+            
+
