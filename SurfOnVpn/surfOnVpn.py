@@ -40,20 +40,24 @@ aboutus = 'Hey there, I am Prabhakar Jha. Young and passonate guy '\
 
 class StartScreen(Screen):
 
-    def verifyPassword(self, password):
-        if password == "":
+    def verifyPassword(self, password_arg):
+        global password
+        if password_arg == "":
             popup = Popup(title='No Password Entered',
                           content=Label(text="Please Enter The Password"),
                           auto_dismiss=True,
                           size_hint=(None, None),
                           size=(300, 300))
             popup.open()
+        else:
+            #  check for root password
+            #  if the root password is correct then
+            password = password_arg
+            print(password)
+            self.parent.current = "SurfOnVpn"
 
 
-
-
-class CalcGridLayout(Screen, GridLayout):
-
+class SurOnVpnLayout(Screen, GridLayout):
     def updateScreen(self, level):
         """
         This function updates the Status of connection on screen.
@@ -91,11 +95,15 @@ class CalcGridLayout(Screen, GridLayout):
 
     def Connect(self):
         # connect here
-        self.vpn = Vpn()
+        global password
+        self.vpn = Vpn(password)
+        print(self.vpn.root_password)
         self.vpn.SELECTED_PROFILE = self.ids.spinner_id.text
         self.vpn.SELECTED_PROFILE_URL = self.vpn.LIST_URL_VPNBOOK_PROFILES[self.vpn.SELECTED_PROFILE]
         # self.vpn.setAcess()
+        print("105")
         status = self.vpn.download_profile()
+        print("107")
         if status == -1:
             # No internet connection!!!
             popup = Popup(title='NO Internet Connection',
@@ -106,7 +114,9 @@ class CalcGridLayout(Screen, GridLayout):
             popup.open()
             self.updateScreen(-1)
         else:
+            print("118")
             if self.vpn.connect_profile() == -1:
+                print("120")
                 self.updateScreen(-1)
                 popup = Popup(title='Failed',
                               content=Label(text='Failed to connect. Try connecting with different server.'),
@@ -115,32 +125,43 @@ class CalcGridLayout(Screen, GridLayout):
                               size=(540, 300))
                 popup.open()
             else:
+                print("129")
                 self.updateScreen(1)
 
     def check_packages(self):
+        """
+        The application requires the OpenVpn so if its not installed then the 
+        installation information is provided to user.
+        """
         process = sub.Popen(["dpkg", "-s", "openvpn"], stdout=sub.PIPE, stderr=sub.PIPE)
         output, errors = process.communicate()
         output = output.decode('utf-8')
         for i in output.splitlines():
             if "Status" in str(i):
                 if "installed" in str(i):
-                    return
-        system("sudo apt-get install openvpn")
+                    return 0
 
     def toggle(self, value):
         if value == "Connect":
             # currently disconnected ...
-            self.check_packages()
-            if self.ids.spinner_id.text == "Select Server":
-                popup = Popup(title='Oops, You are here!',
-                              content=Label(text='Please Select Any Server!!'),
+            if self.check_packages() == 0:
+                if self.ids.spinner_id.text == "Select Server":
+                    popup = Popup(title='Oops, You are here!',
+                                  content=Label(text='Please Select Any Server!!'),
+                                  auto_dismiss=True,
+                                  size_hint=(None, None),
+                                  size=(200, 200))
+                    popup.open()
+                else:
+                    self.updateScreen(0)
+                    Thread(target=self.Connect).start()
+            else:
+                popup = Popup(title='Requirements Missing',
+                              content=Label(text='Go to settings and click on Install Requirements'),
                               auto_dismiss=True,
                               size_hint=(None, None),
-                              size=(200, 200))
+                              size=(540, 300))
                 popup.open()
-            else:
-                self.updateScreen(0)
-                Thread(target=self.Connect).start()
         elif value == "Connecting...":
             pass
         else:
@@ -159,8 +180,6 @@ class Application(App):
         self.title = "SurfOnVpn"
         self.icon = "setting.png"
         return presentation
-
-
 
 app = Application()
 app.run()

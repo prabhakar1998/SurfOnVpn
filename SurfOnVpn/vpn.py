@@ -22,7 +22,7 @@ import shlex
 
 class Vpn():
 
-    def __init__(self):
+    def __init__(self, password=""):
         self.SELECTED_PROFILE = ""
         self.SELECTED_PROFILE_URL = ""
         self.USER_BOOK = "vpnbook"
@@ -42,7 +42,7 @@ class Vpn():
         self.basedir = ".myvpn"
         self.user_data_file = "data.txt"
         self.last_updated = "-1"
-        self.__root_password = ""
+        self.root_password = password
         self.process_ = ""
 
         # If there is old data then update it!!!!
@@ -192,10 +192,15 @@ class Vpn():
     def connect_profile(self):
         self.old_data_exist()
         self.changeDir(3)
+        print("195")
         self.update_password()
+        print("197")
         self.changeDir(3)
+        print("199")
+        print(self.root_password)
         try:
-            system(("echo {} | sudo -S openvpn --remap-usr1 SIGTERM --config {}  --auth-user-pass {} &").format(self.__root_password, self.SELECTED_PROFILE + "Jha.ovpn", self.password_file))
+            print(self.root_password)
+            system(("echo {} | sudo -S openvpn --remap-usr1 SIGTERM --config {}  --auth-user-pass {} &").format(self.root_password, self.SELECTED_PROFILE + "Jha.ovpn", self.password_file))
             time.sleep(22)
             # Now checking if we were successfull or not!!!
             self.process_ = popen("ps -a | grep openvpn").read().splitlines()[-1].split()[0]
@@ -207,7 +212,7 @@ class Vpn():
     def disconnect(self):
         if self.process_ != "":
             try:
-                system("echo {} | sudo -S kill {}".format(self.__root_password, self.process_))
+                system("echo {} | sudo -S kill {}".format(self.root_password, self.process_))
                 self.process_ = ""
             except Exception:
                 pass
@@ -218,13 +223,6 @@ class Vpn():
         self.remove_all_profiles()
         self.update_data_file()
         # anything else if needed
-
-    def setAcess(self):
-        pass
-        # self.old_data_exist()
-        # path = self.basedir+"/" + self.appdir + "/PROFILES/"
-        # chdir(path)
-        # system("echo {} | sudo -S chmod 777 *".format(self.__root_password))
 
 
 
