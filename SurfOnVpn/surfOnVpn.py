@@ -1,35 +1,58 @@
+"""Application File, This file is the main file to run.
+
+Usage python3 surfOnVpn
+Dependencies in setup.py file
 """
-Application File, This file is the main file to run and it imports all other files.
 
 
-
-"""
-import os, threading
+from os import system
+from threading import Thread
 import subprocess as sub
-from vpn import *
+from vpn import Vpn
 from kivy.config import Config
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.lang import Builder
 from kivy.app import App
+from kivy.uix.screenmanager import ScreenManager, Screen
 
 
 Config.set('graphics', 'minimum_width', '550')
 Config.set('graphics', 'minimum_height', '600')
 
-Builder.load_file('surfOnVpn.kv')
+__author__ = "Prabhakar Jha"
+__copyright__ = "Copyright (c) 2018 Prabhakar Jha"
+__credits__ = ["Prabhakar Jha"]
+__license__ = "MIT License"
+__version__ = "1.0.0"
+__maintainer__ = "Prabhakar Jha"
+__email__ = "findmebhanujha@gmail.com"
+
+global aboutus
+aboutus = 'Hey there, I am Prabhakar Jha. Young and passonate guy '\
+          'who loves to solve problem. This project was initiated to'\
+          ' have a UI based proper free and open source VPN '\
+          'Software. This software is meant for education purpose'\
+          ' only. Any illegal use of this software is strictly '\
+          'prohibitted!. Contact me: findmebhanujha@gmail.com'
 
 
-class CalcGridLayout(GridLayout):
+class StartScreen(Screen):
 
-    global aboutus
-    aboutus = 'Hey there, I am Prabhakar Jha. Young and passonate guy '\
-              'who loves to solve problem. This project was initiated to'\
-              ' have a UI based proper free and open source VPN '\
-              'Software. This software is meant for education purpose'\
-              ' only. Any illegal use of this software is strictly '\
-              'prohibitted!. Contact me: findmebhanujha@gmail.com'
+    def verifyPassword(self, password):
+        if password == "":
+            popup = Popup(title='No Password Entered',
+                          content=Label(text="Please Enter The Password"),
+                          auto_dismiss=True,
+                          size_hint=(None, None),
+                          size=(300, 300))
+            popup.open()
+
+
+
+
+class CalcGridLayout(Screen, GridLayout):
 
     def updateScreen(self, level):
         """
@@ -86,7 +109,7 @@ class CalcGridLayout(GridLayout):
             if self.vpn.connect_profile() == -1:
                 self.updateScreen(-1)
                 popup = Popup(title='Failed',
-                              content=Label(text='Failed to connect'),
+                              content=Label(text='Failed to connect. Try connecting with different server.'),
                               auto_dismiss=True,
                               size_hint=(None, None),
                               size=(540, 300))
@@ -102,7 +125,7 @@ class CalcGridLayout(GridLayout):
             if "Status" in str(i):
                 if "installed" in str(i):
                     return
-        os.system("sudo apt-get install openvpn")
+        system("sudo apt-get install openvpn")
 
     def toggle(self, value):
         if value == "Connect":
@@ -117,7 +140,7 @@ class CalcGridLayout(GridLayout):
                 popup.open()
             else:
                 self.updateScreen(0)
-                threading.Thread(target=self.Connect).start()
+                Thread(target=self.Connect).start()
         elif value == "Connecting...":
             pass
         else:
@@ -125,11 +148,19 @@ class CalcGridLayout(GridLayout):
             self.updateScreen(-1)
 
 
+class ScreenManagement(ScreenManager):
+    pass
+
+presentation = Builder.load_file('surfOnVpn.kv')
+
+
 class Application(App):
     def build(self):
         self.title = "SurfOnVpn"
         self.icon = "setting.png"
-        return CalcGridLayout()
+        return presentation
+
+
 
 app = Application()
 app.run()

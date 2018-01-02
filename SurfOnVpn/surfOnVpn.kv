@@ -1,5 +1,52 @@
 #:import hex kivy.utils.get_color_from_hex
 #:import  MarkupLabel kivy.core.text.markup.MarkupLabel
+#:import FadeTransition kivy.uix.screenmanager.FadeTransition
+
+
+ScreenManagement:
+    transition: FadeTransition()
+    StartScreen:
+    CalcGridLayout:
+
+<StartScreen>:
+    name: "startscreen"
+    id: startscreen
+    canvas.before:
+        Rectangle:
+            source: 'bg4.jpg'
+            pos: self.pos
+            size: self.size
+
+    GridLayout:
+        rows: 4               
+        Label:
+            id: label_password
+            text: "We need root Access, So enter your root password."
+            font_size: 22
+
+        FloatLayout:
+            TextInput:
+                id: password_input
+                multiline: False
+                on_focus: self.background_color = hex('#631d1d') 
+                height: root.height * 0.12
+                width: root.width * 0.38
+                size_hint: None, None
+                x: self.width * 0.8
+                y: label_password.y - self.height 
+                password: True
+
+            Button:                
+                text: "Enter Password"
+                fot_size: 50       
+                size_hint: None, None
+                height: root.height * 0.15
+                width: root.width * 0.38
+                x: password_input.x
+                y: password_input.y - self.height 
+                on_release: app.root.current = "SurfOnVpn"
+                on_press: startscreen.verifyPassword(password_input.text)
+
 <CalcGridLayout>: 
     name: "SurfOnVpn" 
     minimum_width:  400
@@ -48,15 +95,8 @@
     			font_size: 26
     			color: hex('#66ffb3')
                 bcolor: 1, 1, 1, 1
-                #  pos: settings_btn.x - settings_btn.width - self.texture_size[0] , settings_btn.y - self.texture_size[1]    
                 pos: 0, mainWindow.height - self.font_size  * 7
                 text_size: 220, None            
-	            # canvas.before:
-                #    Color:
-                #        rgba: self.bcolor
-                #    Rectangle:
-                #        pos: 2.7 * self.x, 1.17 * self.y
-                #        size: self.texture_size[0] * 1.2, self.texture_size[1] * 2
 
         BoxLayout:
             orientation: 'vertical'

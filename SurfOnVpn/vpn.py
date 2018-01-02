@@ -7,10 +7,10 @@ USage:
 
 """
 
-import os
-import urllib
-import zipfile
-import requests
+from os import chdir, listdir, mkdir, remove, system, popen, rename
+from urllib.request import urlretrieve
+from zipfile import ZipFile
+from requests import get
 from bs4 import BeautifulSoup
 import datetime
 from os.path import expanduser
@@ -42,7 +42,7 @@ class Vpn():
         self.basedir = ".myvpn"
         self.user_data_file = "data.txt"
         self.last_updated = "-1"
-        self.root_password = "bhanujha4@"
+        self.__root_password = ""
         self.process_ = ""
 
         # If there is old data then update it!!!!
@@ -52,30 +52,30 @@ class Vpn():
     def changeDir(self, level):
         if level == 1:
             # Move to desktop_path
-            os.chdir(self.desktop_path)
+            chdir(self.desktop_path)
         if level >= 2:
             # Move to basedir
-            os.chdir(self.desktop_path)
-            if self.basedir not in os.listdir("."):
-                os.mkdir(self.basedir)
-            os.chdir(self.basedir)
+            chdir(self.desktop_path)
+            if self.basedir not in listdir("."):
+                mkdir(self.basedir)
+            chdir(self.basedir)
         if level == 3:
             # Move to profiles
-            if self.profile_dir not in os.listdir("."):
-                os.mkdir(self.profile_dir)
-            os.chdir(self.profile_dir)
+            if self.profile_dir not in listdir("."):
+                mkdir(self.profile_dir)
+            chdir(self.profile_dir)
 
     def old_data_exist(self):
         self.changeDir(2)
-        if self.profile_dir not in os.listdir('.'):
-            os.mkdir(self.profile_dir)
-            os.chdir(self.profile_dir)
+        if self.profile_dir not in listdir('.'):
+            mkdir(self.profile_dir)
+            chdir(self.profile_dir)
             return False
-        os.chdir(self.profile_dir)
+        chdir(self.profile_dir)
         return True
 
     def retrieve_data(self):
-        if self.user_data_file in os.listdir('.'):
+        if self.user_data_file in listdir('.'):
             user_data = open(self.user_data_file, "r")
             # validate the data also if user modified we may face issues
             self.SELECTED_PROFILE = user_data.readline()
@@ -100,21 +100,21 @@ class Vpn():
         download_url = self.SELECTED_PROFILE_URL
         self.changeDir(3)
         try:
-            urllib.request.urlretrieve(download_url, "tempfile")
+            urlretrieve(download_url, "tempfile")
         except Exception:
             # Popup for net connection needed!!
             return -1
-        if "tempfile" in os.listdir('.'):
-            zip_ref = zipfile.ZipFile("tempfile", 'r')
+        if "tempfile" in listdir('.'):
+            zip_ref = ZipFile("tempfile", 'r')
             zip_ref.extractall(".")
             zip_ref.close()
-            os.remove("tempfile")
+            remove("tempfile")
             # keeping only port80 tcp
-            list_files = os.listdir('.')
+            list_files = listdir('.')
             for file_ in list_files:
                 if file_.find("tcp80") > 0:
                     list_files.remove(file_)
-                    os.rename(file_, self.SELECTED_PROFILE + "Jha" + ".ovpn")
+                    rename(file_, self.SELECTED_PROFILE + "Jha" + ".ovpn")
                 elif file_.find("Jha") > 0:
                     list_files.remove(file_)
             if "credentials.txt" in list_files:
@@ -123,7 +123,7 @@ class Vpn():
 
     def list_profiles(self):
         self.changeDir(3)
-        files = os.listdir(".")
+        files = listdir(".")
         if len(files) < 2:
             return [-1]
         else:
@@ -136,7 +136,7 @@ class Vpn():
             pass
         else:
             self.changeDir(3)
-            files = os.listdir(".")
+            files = listdir(".")
             if len(files) < 2:
                 # error nothing to delete!!!!
                 # return -1
@@ -144,7 +144,7 @@ class Vpn():
             else:
                 files.remove(self.password_file)
                 for file_ in files:
-                    os.remove(file_)
+                    remove(file_)
                 # !!!tell that its done
         self.SELECTED_PROFILE = ""
         self.SELECTED_PROFILE_URL = ""
@@ -159,7 +159,7 @@ class Vpn():
                int(str(datetime.date.today() - self.last_updated).split()[0]) >= 3:
                 # If last update was few days before
                 url = self.URL_VPNBOOK
-                req = requests.get(url)
+                req = get(url)
                 soup = BeautifulSoup(req.text, "lxml")
                 op = str(soup.find_all("li", {"id": "openvpn"})[0])
                 op = op[op.find("Password"):].replace("\n", "")
@@ -195,10 +195,10 @@ class Vpn():
         self.update_password()
         self.changeDir(3)
         try:
-            os.system(("echo {} | sudo -S openvpn --remap-usr1 SIGTERM --config {}  --auth-user-pass {} &").format(self.root_password, self.SELECTED_PROFILE + "Jha.ovpn", self.password_file))
+            system(("echo {} | sudo -S openvpn --remap-usr1 SIGTERM --config {}  --auth-user-pass {} &").format(self.__root_password, self.SELECTED_PROFILE + "Jha.ovpn", self.password_file))
             time.sleep(22)
             # Now checking if we were successfull or not!!!
-            self.process_ = os.popen("ps -a | grep openvpn").read().splitlines()[-1].split()[0]
+            self.process_ = popen("ps -a | grep openvpn").read().splitlines()[-1].split()[0]
             return 0
         except IndexError:
             # NO PID'S FOUND!!! Unable to connect!
@@ -207,7 +207,7 @@ class Vpn():
     def disconnect(self):
         if self.process_ != "":
             try:
-                os.system("echo {} | sudo -S kill {}".format(self.root_password, self.process_))
+                system("echo {} | sudo -S kill {}".format(self.__root_password, self.process_))
                 self.process_ = ""
             except Exception:
                 pass
@@ -223,8 +223,8 @@ class Vpn():
         pass
         # self.old_data_exist()
         # path = self.basedir+"/" + self.appdir + "/PROFILES/"
-        # os.chdir(path)
-        # os.system("echo {} | sudo -S chmod 777 *".format(self.root_password))
+        # chdir(path)
+        # system("echo {} | sudo -S chmod 777 *".format(self.__root_password))
 
 
 
