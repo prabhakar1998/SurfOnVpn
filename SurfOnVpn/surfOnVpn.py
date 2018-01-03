@@ -5,7 +5,6 @@ Dependencies in setup.py file
 """
 
 
-from os import system
 from threading import Thread
 import subprocess as sub
 from vpn import Vpn
@@ -29,13 +28,30 @@ __version__ = "1.0.0"
 __maintainer__ = "Prabhakar Jha"
 __email__ = "findmebhanujha@gmail.com"
 
-global aboutus
-aboutus = 'Hey there, I am Prabhakar Jha. Young and passonate guy '\
-          'who loves to solve problem. This project was initiated to'\
-          ' have a UI based proper free and open source VPN '\
-          'Software. This software is meant for education purpose'\
-          ' only. Any illegal use of this software is strictly '\
-          'prohibitted!. Contact me: findmebhanujha@gmail.com'
+global settings_menu
+aboutus = '[font=RobotoMono-Regular] Hey there, I am Prabhakar Jha.\n Young and '\
+          ' passonate guy who loves to \n solve challengin problem.\n This project was initiated to'\
+          ' have a \n UI based proper free and open source VPN \n'\
+          ' Software.\n This software is for educational purpose'\
+          ' only.\n Any illegal use of this software is\n strictly'\
+          ' prohibitted!. \n\n Contact me : [u]findmebhanujha@gmail.com [/u]\n[/font]'
+
+contribute = '[font=RobotoMono-Regular]                Liked my work.\n'\
+             ' Great! you can also contribute to this project \n at'\
+             ' the following link.\n\n [u]https://github.com/prabhakar1998/SurfOnVpn\n[/u][/font]'
+
+install_requirements = ""
+
+report_issue = "[font=RobotoMono-Regular]Contact Developer: [u]findmebhanujha@gmail.com[/u][/font]"
+
+neeed_help = "[font=RobotoMono-Regular]Contact Developer: [u]findmebhanujha@gmail.com[/u][/font]"
+
+settings_menu = {
+    "About Us": aboutus,
+    "Contribute": contribute,
+    "Install Requirements": install_requirements,
+    "Report An Issue": report_issue,
+    "Need Help": neeed_help}
 
 
 class StartScreen(Screen):
@@ -47,7 +63,7 @@ class StartScreen(Screen):
                           content=Label(text="Please Enter The Password"),
                           auto_dismiss=True,
                           size_hint=(None, None),
-                          size=(300, 300))
+                          size=(540, 350))
             popup.open()
         else:
             #  check for root password
@@ -82,16 +98,18 @@ class SurOnVpnLayout(Screen, GridLayout):
 
     def settings(self, text):
         # "Settings", "About Us", "Contribute", "Help", "Report Issue"
-        global aboutus
-        if text == "Settings":
+        global settings_menu
+        if text == "Install Requirements":
+            # do the installation stuff
             pass
-        elif text == "About Us":
-                popup = Popup(title='About Us',
-                              content=Label(text=aboutus),
-                              auto_dismiss=True,
-                              size_hint=(None, None),
-                              size=(540, 300))
-                popup.open()
+        elif text != "Settings":
+            popup = Popup(title=text,
+                          content=Label(markup=True, text=settings_menu[text]),
+                          auto_dismiss=True,
+                          size_hint=(None, None),
+                          size=(540, 350),
+                          )
+            popup.open()
 
     def Connect(self):
         # connect here
@@ -110,7 +128,7 @@ class SurOnVpnLayout(Screen, GridLayout):
                           content=Label(text='Please Check If You Have A Working Internet Connection.'),
                           auto_dismiss=True,
                           size_hint=(None, None),
-                          size=(540, 300))
+                          size=(540, 350))
             popup.open()
             self.updateScreen(-1)
         else:
@@ -122,7 +140,7 @@ class SurOnVpnLayout(Screen, GridLayout):
                               content=Label(text='Failed to connect. Try connecting with different server.'),
                               auto_dismiss=True,
                               size_hint=(None, None),
-                              size=(540, 300))
+                              size=(540, 350))
                 popup.open()
             else:
                 print("129")
@@ -150,7 +168,7 @@ class SurOnVpnLayout(Screen, GridLayout):
                                   content=Label(text='Please Select Any Server!!'),
                                   auto_dismiss=True,
                                   size_hint=(None, None),
-                                  size=(200, 200))
+                                  size=(540, 350))
                     popup.open()
                 else:
                     self.updateScreen(0)
@@ -160,7 +178,7 @@ class SurOnVpnLayout(Screen, GridLayout):
                               content=Label(text='Go to settings and click on Install Requirements'),
                               auto_dismiss=True,
                               size_hint=(None, None),
-                              size=(540, 300))
+                              size=(540, 350))
                 popup.open()
         elif value == "Connecting...":
             pass

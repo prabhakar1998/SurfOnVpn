@@ -18,17 +18,19 @@ ScreenManagement:
             size: self.size
 
     GridLayout:
-        rows: 4               
+        rows: 3              
         Label:
             id: label_password
-            text: "We need root Access, So enter your root password."
-            font_size: 22
+            markup: True 
+            text: "[font=RobotoMono-Regular]By clicking Enter Password you agree our terms and conditions This software is only for educational purpose. \nAny missuse of it is punishable.[/font] \n\nWe need root Access, So enter your root password."
+            font_size: 24
+            text_size: 550, None 
 
         FloatLayout:
             TextInput:
                 id: password_input
                 multiline: False
-                on_focus: self.background_color = hex('#631d1d') 
+                on_focus: self.background_color = hex('#d9d9d9') 
                 height: root.height * 0.12
                 width: root.width * 0.38
                 size_hint: None, None
@@ -39,14 +41,15 @@ ScreenManagement:
 
             Button:                
                 text: "Enter Password"
-                fot_size: 50       
+                font_size: 23
                 size_hint: None, None
                 height: root.height * 0.15
                 width: root.width * 0.38
                 x: password_input.x
-                y: password_input.y - self.height 
+                y: password_input.y - self.height * 1.1 
                 #on_release: app.root.current = "SurfOnVpn"
                 on_press: startscreen.verifyPassword(password_input.text)
+                background_color: hex('#66ff66')
 
 <SurOnVpnLayout>: 
     name: "SurfOnVpn" 
@@ -145,10 +148,5 @@ ScreenManagement:
                 width: mainWindow.width * 0.211   
                 pos:  spinner_id.x , spinner_id.y - self.height * 1.5             
                 on_press: mainWindow.toggle(self.text)
-
-
-<InitialWindow>:
-    Label:
-        text: "We need root access to connect please provide root password."
             
 

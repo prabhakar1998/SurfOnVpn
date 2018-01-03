@@ -1,28 +1,27 @@
-"""
-This file contains all the functions for the project.
-
-Author:
-License:
-USage:
-
-"""
+"""This file contains all the functions for the vpn connection."""
 
 from os import chdir, listdir, mkdir, remove, system, popen, rename
 from urllib.request import urlretrieve
 from zipfile import ZipFile
 from requests import get
 from bs4 import BeautifulSoup
-import datetime
 from os.path import expanduser
-import subprocess
-import sys
-import time
-import shlex
+from time import sleep
+
+__author__ = "Prabhakar Jha"
+__copyright__ = "Copyright (c) 2018 Prabhakar Jha"
+__credits__ = ["Prabhakar Jha"]
+__license__ = "MIT License"
+__version__ = "1.0.0"
+__maintainer__ = "Prabhakar Jha"
+__email__ = "findmebhanujha@gmail.com"
 
 
 class Vpn():
+    """Contains function connect_profile() to connect to the server."""
 
     def __init__(self, password=""):
+        """It initialize the basic required class instances."""
         self.SELECTED_PROFILE = ""
         self.SELECTED_PROFILE_URL = ""
         self.USER_BOOK = "vpnbook"
@@ -36,20 +35,23 @@ class Vpn():
              "DE": "http://www.vpnbook.com/free-openvpn-account/VPNBook.com-OpenVPN-DE1.zip"}
         self.profile_dir = ".PROFILES"
         self.password_file = "credential.txt"
-        # self.basedir = "/usr/share/"
-        # self.appdir = "myvpn"
         self.desktop_path = expanduser("~/Desktop/../")
         self.basedir = ".myvpn"
         self.user_data_file = "data.txt"
-        self.last_updated = "-1"
         self.root_password = password
         self.process_ = ""
 
         # If there is old data then update it!!!!
         if self.old_data_exist() is True:
+            # helps to select the profile selected by the user previously
             self.retrieve_data()
 
-    def changeDir(self, level):
+    def change_dir(self, level):
+        """
+        The function change_dir takes argument level.
+
+        It then navigates to the directory according to the level specified.
+        """
         if level == 1:
             # Move to desktop_path
             chdir(self.desktop_path)
@@ -66,7 +68,13 @@ class Vpn():
             chdir(self.profile_dir)
 
     def old_data_exist(self):
-        self.changeDir(2)
+        """
+        It checks if any old data is there.
+
+        old_data_exist() -> returns True if old data exists.
+        else returns False.
+        """
+        self.change_dir(2)
         if self.profile_dir not in listdir('.'):
             mkdir(self.profile_dir)
             chdir(self.profile_dir)
@@ -75,30 +83,32 @@ class Vpn():
         return True
 
     def retrieve_data(self):
+        """It reads data file and updates the program."""
         if self.user_data_file in listdir('.'):
             user_data = open(self.user_data_file, "r")
             # validate the data also if user modified we may face issues
             self.SELECTED_PROFILE = user_data.readline()
             self.SELECTED_PROFILE_URL = user_data.readline()
-            self.last_updated = user_data.readline()
-            if self.last_updated != -1:
-                date = tuple(map(lambda a: int(a), self.last_updated.split()))
-                self.last_updated = datetime.date(date[0], date[1], date[2])
             user_data.close()
 
     def update_data_file(self):
-        self.changeDir(3)
+        """It updates the data file with the current data."""
+        self.change_dir(3)
         user_data = open(self.user_data_file, "w")
         user_data.write(self.SELECTED_PROFILE)
         user_data.write("\n")
         user_data.write(self.SELECTED_PROFILE_URL)
         user_data.write("\n")
-        user_data.write(self.last_updated)
         user_data.close()
 
     def download_profile(self):
+        """
+        Function downloads all the required files from the VpnBook server.
+
+        Only the tcp port 80 file is saved and rest all deleted.
+        """
         download_url = self.SELECTED_PROFILE_URL
-        self.changeDir(3)
+        self.change_dir(3)
         try:
             urlretrieve(download_url, "tempfile")
         except Exception:
@@ -122,7 +132,12 @@ class Vpn():
             return 0
 
     def list_profiles(self):
-        self.changeDir(3)
+        """
+        It returns the list of profiles.
+
+        It returns [-1] if there is no profile
+        """
+        self.change_dir(3)
         files = listdir(".")
         if len(files) < 2:
             return [-1]
@@ -130,12 +145,13 @@ class Vpn():
             return files
 
     def remove_profiles(self):
+        """It deletes all the profiles in the application's directory."""
         profiles = self.list_profiles()
         if profiles[0] == -1:
             # already no file
             pass
         else:
-            self.changeDir(3)
+            self.change_dir(3)
             files = listdir(".")
             if len(files) < 2:
                 # error nothing to delete!!!!
@@ -148,30 +164,24 @@ class Vpn():
                 # !!!tell that its done
         self.SELECTED_PROFILE = ""
         self.SELECTED_PROFILE_URL = ""
-        self.last_updated = "-1"
         self.update_data_file()
 
     def update_password(self):
-        self.changeDir(3)
-        difference = str(datetime.date.today() - self.last_updated).split()
-        if len(difference) > 1:
-            if self.last_updated == "-1" or \
-               int(str(datetime.date.today() - self.last_updated).split()[0]) >= 3:
-                # If last update was few days before
-                url = self.URL_VPNBOOK
-                req = get(url)
-                soup = BeautifulSoup(req.text, "lxml")
-                op = str(soup.find_all("li", {"id": "openvpn"})[0])
-                op = op[op.find("Password"):].replace("\n", "")
-                password = op[op.find(":") + 2:]
-                password = password[:password.find("<")]
-                cred_file = open(self.password_file, "w")
-                cred_file.write(self.USER_BOOK)
-                cred_file.write("\n")
-                cred_file.write(password)
-                cred_file.close()
-                self.last_updated = str(datetime.datetime.now()).split()[0].replace("-", " ")
-                self.update_data_file()
+        """Function updates the password from the Vpnbook server."""
+        self.change_dir(3)
+        url = self.URL_VPNBOOK
+        req = get(url)
+        soup = BeautifulSoup(req.text, "lxml")
+        op = str(soup.find_all("li", {"id": "openvpn"})[0])
+        op = op[op.find("Password"):].replace("\n", "")
+        password = op[op.find(":") + 2:]
+        password = password[:password.find("<")]
+        cred_file = open(self.password_file, "w")
+        cred_file.write(self.USER_BOOK)
+        cred_file.write("\n")
+        cred_file.write(password)
+        cred_file.close()
+        self.update_data_file()
 
     # def select_profile(self):
     #     count = 0
@@ -190,46 +200,39 @@ class Vpn():
     #             break
 
     def connect_profile(self):
+        """It tries to connnect to the selected_profile server."""
         self.old_data_exist()
-        self.changeDir(3)
+        self.change_dir(3)
         print("195")
         self.update_password()
         print("197")
-        self.changeDir(3)
+        self.change_dir(3)
         print("199")
         print(self.root_password)
         try:
             print(self.root_password)
             system(("echo {} | sudo -S openvpn --remap-usr1 SIGTERM --config {}  --auth-user-pass {} &").format(self.root_password, self.SELECTED_PROFILE + "Jha.ovpn", self.password_file))
-            time.sleep(22)
+            sleep(22)
             # Now checking if we were successfull or not!!!
-            self.process_ = popen("ps -a | grep openvpn").read().splitlines()[-1].split()[0]
+            self.process_ = popen("ps -a | grep openvpn").read().\
+                splitlines()[-1].split()[0]
             return 0
         except IndexError:
             # NO PID'S FOUND!!! Unable to connect!
             return -1
 
     def disconnect(self):
+        """If there exists any connection with server then it disconnect it."""
         if self.process_ != "":
             try:
-                system("echo {} | sudo -S kill {}".format(self.root_password, self.process_))
+                system("echo {} | sudo -S kill {}".format(self.root_password,
+                                                          self.process_))
                 self.process_ = ""
             except Exception:
                 pass
 
     def on_destroy(self):
-        # VERY VERY IMP !!!!
-        # keep the process id and then do something like ctrl + c
-        self.remove_all_profiles()
+        """Disconnect the user and saves all data before the app is closed."""
+        self.disconnect()
         self.update_data_file()
         # anything else if needed
-
-
-
-if __name__ == '__main__':
-
-    # call init or display function!!
-    vpn = Vpn()
-    # vpn.setAcess()
-    vpn.select_profile()
-    vpn.connect_profile()
