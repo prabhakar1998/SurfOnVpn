@@ -48,7 +48,7 @@ ScreenManagement:
                 x: password_input.x
                 y: password_input.y - self.height * 1.1 
                 #on_release: app.root.current = "SurfOnVpn"
-                on_press: startscreen.verifyPassword(password_input.text)
+                on_press: startscreen.verify_password(password_input.text)
                 background_color: hex('#66ff66')
 
 <SurOnVpnLayout>: 
@@ -147,6 +147,6 @@ ScreenManagement:
                 height: mainWindow.height * 0.111  
                 width: mainWindow.width * 0.211   
                 pos:  spinner_id.x , spinner_id.y - self.height * 1.5             
-                on_press: mainWindow.toggle(self.text)
+                on_press: mainWindow.connect_button(self.text)
             
 

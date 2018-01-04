@@ -203,14 +203,9 @@ class Vpn():
         """It tries to connnect to the selected_profile server."""
         self.old_data_exist()
         self.change_dir(3)
-        print("195")
         self.update_password()
-        print("197")
         self.change_dir(3)
-        print("199")
-        print(self.root_password)
         try:
-            print(self.root_password)
             system(("echo {} | sudo -S openvpn --remap-usr1 SIGTERM --config {}  --auth-user-pass {} &").format(self.root_password, self.SELECTED_PROFILE + "Jha.ovpn", self.password_file))
             sleep(22)
             # Now checking if we were successfull or not!!!
